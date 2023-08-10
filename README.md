@@ -2,6 +2,12 @@
 
 A demo of gittuf.
 
+## TODO
+
+This script will currently fail because the GPG keyring has not been checked
+in. The script will be updated to generate a GPG key pair on the fly for the
+test repository.
+
 ## Install gittuf
 
 We recommend installing gittuf using Go's toolchain.
