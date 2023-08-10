@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import gnupg
 import os
 import shlex
 import shutil
@@ -9,8 +10,6 @@ import tempfile
 
 NO_PROMPT = False
 REQUIRED_BINARIES = ["git", "gittuf", "gpg"]
-AUTHORIZED_GPG_KEY_ID = "68A760FCD2F5D089DD6EA9743ED92EAC3282A02A"
-UNAUTHORIZED_GPG_KEY_ID = "BDB5D6B28E3208612836033CE8654898683AF004"
 
 
 def check_binaries():
@@ -35,6 +34,33 @@ def display_command(cmd):
     print(f"[{os.getcwd()}] $ {cmd}")
 
 
+def setup_gpg_keys(gpg_dir):
+    os.mkdir(gpg_dir)
+
+    gpg = gnupg.GPG(gnupghome=gpg_dir)
+    gpg.encoding = "utf-8"
+
+    key_params = gpg.gen_key_input(
+        key_type="RSA",
+        key_length=1024,
+        name_real="Authorized Developer",
+        name_email="gittuf.authorized@example.com",
+        no_protection=True
+    )
+    authorized_gpg_key = gpg.gen_key(key_params)
+
+    key_params = gpg.gen_key_input(
+        key_type="RSA",
+        key_length=1024,
+        name_real="Unauthorized Developer",
+        name_email="gittuf.unauthorized@example.com",
+        no_protection=True
+    )
+    unauthorized_gpg_key = gpg.gen_key(key_params)
+
+    return authorized_gpg_key, unauthorized_gpg_key
+
+
 def run_demo():
     current_dir = os.getcwd()
     gpg_dir = "gpg-dir"
@@ -45,7 +71,14 @@ def run_demo():
     tmp_keys_dir = os.path.join(tmp_dir.name, keys_dir)
     tmp_repo_dir = os.path.join(tmp_dir.name, "repo")
 
-    shutil.copytree(os.path.join(current_dir, gpg_dir), tmp_gpg_dir)
+    prompt_key("Create test GPG keys")
+    authorized_gpg_key, unauthorized_gpg_key = setup_gpg_keys(tmp_gpg_dir)
+    prompt_key(
+        "Created authorized key with fingerprint"
+        f" {authorized_gpg_key.fingerprint} and unauthorized key with"
+        f" fingerprint {unauthorized_gpg_key.fingerprint}"
+    )
+
     shutil.copytree(os.path.join(current_dir, keys_dir), tmp_keys_dir)
     os.mkdir(tmp_repo_dir)
     os.chdir(tmp_repo_dir)
@@ -56,7 +89,7 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Set repo config to use demo identity and test key")
-    cmd = f"git config --local user.signingkey {AUTHORIZED_GPG_KEY_ID}"
+    cmd = f"git config --local user.signingkey {authorized_gpg_key.fingerprint}"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
     cmd = f"git config --local user.name gittuf-demo"
@@ -93,7 +126,7 @@ def run_demo():
         " -k ../keys/targets"
         " --rule-name 'protect-main'"
         " --rule-pattern git:refs/heads/main"
-        f" --authorize-key gpg:{AUTHORIZED_GPG_KEY_ID}"
+        f" --authorize-key gpg:{authorized_gpg_key.fingerprint}"
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
@@ -120,10 +153,12 @@ def run_demo():
     prompt_key("Verify branch protection for this change")
     cmd = "gittuf verify-ref main"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    subprocess.run(shlex.split(cmd), check=True)
+
+    prompt_key("gittuf's verification succeeded!")
 
     prompt_key("Update repo config to use unauthorized key")
-    cmd = f"git config --local user.signingkey {UNAUTHORIZED_GPG_KEY_ID}"
+    cmd = f"git config --local user.signingkey {unauthorized_gpg_key.fingerprint}"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 

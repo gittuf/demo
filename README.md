@@ -2,12 +2,6 @@
 
 A demo of gittuf.
 
-## TODO
-
-This script will currently fail because the GPG keyring has not been checked
-in. The script will be updated to generate a GPG key pair on the fly for the
-test repository.
-
 ## Install gittuf
 
 We recommend installing gittuf using Go's toolchain.
@@ -38,22 +32,22 @@ If you prefer to run the demo manually, set up a directory structure as follows:
 
 ```
 .
-├── gpg-dir
 ├── keys
 └── repo
 ```
 
-`gpg-dir` and `keys` must be copied from this repository. Finally, set your
-working directory to `repo`.
+`keys` must be copied from this repository. You must also create two
+Git-compatible signing keys, one that is authorized for the demo policy and one
+that is not. Finally, set your working directory to `repo`.
 
 ```bash
 git init -b main
 
-git config --local user.signingkey 68A760FCD2F5D089DD6EA9743ED92EAC3282A02A
+git config --local user.signingkey <authorized_key>  # amend config options as needed for your chosen signing mechanism
 git config --local user.name gittuf-demo
 git config --local user.email gittuf.demo@example.com
 
-export GNUPGHOME=../gpg-dir
+export GNUPGHOME=../gpg-dir  # optional: set GPG home if you're using GPG keys from a non-default keyring
 
 gittuf trust init -k ../keys/root
 
@@ -61,7 +55,7 @@ gittuf trust add-policy-key -k ../keys/root --policy-key ../keys/targets.pub
 
 gittuf policy init -k ../keys/targets
 
-gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize-key gpg:68A760FCD2F5D089DD6EA9743ED92EAC3282A02A
+gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize-key <signing_mechanism>:<authorized_key>
 
 echo 'Hello, world!' > README.md
 git add README.md
@@ -71,7 +65,7 @@ gittuf rsl record main
 
 gittuf verify-ref main
 
-git config --local user.signingkey BDB5D6B28E3208612836033CE8654898683AF004
+git config --local user.signingkey <unauthorized_key>
 
 echo 'This is not allowed!' >> README.md
 git add README.md
