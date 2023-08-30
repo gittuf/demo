@@ -151,7 +151,7 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Verify branch protection for this change")
-    cmd = "gittuf verify-ref main"
+    cmd = "gittuf verify-ref -f main"
     display_command(cmd)
     subprocess.run(shlex.split(cmd), check=True)
 
@@ -182,7 +182,7 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Verify branch protection for this change")
-    cmd = "gittuf verify-ref main"
+    cmd = "gittuf verify-ref -f main"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
