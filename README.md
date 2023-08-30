@@ -4,10 +4,11 @@ A demo of gittuf.
 
 ## Install gittuf
 
-We recommend installing gittuf using Go's toolchain.
+We recommend installing gittuf using Go's toolchain. gittuf requires Go 1.20 or
+higher.
 
 ```bash
-go install github.com/adityasaky/gittuf
+go install github.com/adityasaky/gittuf@latest
 ```
 
 Alternatively, you can clone the repository and build it from source.
@@ -63,7 +64,7 @@ git commit -m 'Initial commit'
 
 gittuf rsl record main
 
-gittuf verify-ref main
+gittuf verify-ref -f main
 
 git config --local user.signingkey <unauthorized_key>
 
@@ -73,5 +74,5 @@ git commit -m 'Update README.md'
 
 gittuf rsl record main
 
-gittuf verify-ref main
+gittuf verify-ref -f main
 ```
