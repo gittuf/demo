@@ -8,13 +8,13 @@ We recommend installing gittuf using Go's toolchain. gittuf requires Go 1.20 or
 higher.
 
 ```bash
-go install github.com/adityasaky/gittuf@latest
+go install github.com/gittuf/gittuf@latest
 ```
 
 Alternatively, you can clone the repository and build it from source.
 
 ```bash
-git clone https://github.com/adityasaky/gittuf
+git clone https://github.com/gittuf/gittuf
 
 make
 ```
