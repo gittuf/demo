@@ -56,6 +56,7 @@ gittuf trust add-policy-key -k ../keys/root --policy-key ../keys/targets.pub
 
 gittuf policy init -k ../keys/targets
 
+# Add branch protection rule
 gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize-key <signing_mechanism>:<authorized_key>
 
 echo 'Hello, world!' > README.md
@@ -64,8 +65,10 @@ git commit -m 'Initial commit'
 
 gittuf rsl record main
 
+# This will succeed!
 gittuf verify-ref -f main
 
+# Simulate violation by using unauthorized key
 git config --local user.signingkey <unauthorized_key>
 
 echo 'This is not allowed!' >> README.md
@@ -74,5 +77,28 @@ git commit -m 'Update README.md'
 
 gittuf rsl record main
 
+# This will fail as branch protection rule is violated!
+gittuf verify-ref -f main
+
+# Rewind to known good state
+git reset --hard HEAD~1
+git update-ref refs/gittuf/reference-state-log refs/gittuf/reference-state-log~1
+git config --local user.signingkey <authorized_key>
+
+# Add file protection rule
+gittuf policy add-rule -k ../keys/targets --rule-name 'protect-readme' --rule-pattern file:README.md --authorize-key <signing_mechanism>:<authorized_key>
+
+# Make change to README.md using unauthorized key
+git config --local user.signingkey <unauthorized_key>
+
+echo 'This is not allowed!' >> README.md
+git add README.md
+git commit -m 'Update README.md'
+
+# But record RSL entry using authorized key to meet branch protection rule
+git config --local user.signingkey <authorized_key>
+gittuf rsl record main
+
+# This will fail as file protection rule is violated!
 gittuf verify-ref -f main
 ```

@@ -186,7 +186,63 @@ def run_demo():
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
-    prompt_key("gittuf detected a policy violation!")
+    prompt_key("gittuf detected a violation of the branch protection rule!")
+
+    prompt_key("Rewind to last good state to test file protection rules")
+    cmd = "git reset --hard HEAD~1"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = "git update-ref refs/gittuf/reference-state-log refs/gittuf/reference-state-log~1"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = f"git config --local user.signingkey {authorized_gpg_key.fingerprint}"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+
+    prompt_key("Add rule to protect README.md")
+    cmd = ("gittuf policy add-rule"
+        " -k ../keys/targets"
+        " --rule-name 'protect-readme'"
+        " --rule-pattern file:README.md"
+        f" --authorize-key gpg:{authorized_gpg_key.fingerprint}"
+    )
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+
+    prompt_key("Make change to README.md using unauthorized key")
+    cmd = f"git config --local user.signingkey {unauthorized_gpg_key.fingerprint}"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    display_command("echo 'This is not allowed!' >> README.md")
+    with open("README.md", "a") as fp:
+        fp.write("This is not allowed!\n")
+    cmd = "git add README.md"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = "git commit -m 'Update README.md'"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+
+    prompt_key("But create RSL entry using authorized key")
+    cmd = f"git config --local user.signingkey {authorized_gpg_key.fingerprint}"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = "gittuf rsl record main"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = "git show refs/gittuf/reference-state-log"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+
+    prompt_key("Verify all rules for this change")
+    cmd = "gittuf verify-ref -f main"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+
+    prompt_key(
+        "gittuf detected a **file** protection rule violation even though the"
+        " branch protection rule was met!"
+    )
 
 
 if __name__ == "__main__":
