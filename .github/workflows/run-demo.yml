@@ -1,0 +1,33 @@
+name: Run gittuf demo
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  run-demo:
+    name: Run demo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout demo
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+      - name: Set up Python
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+      - name: Set up Go
+        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
+        with:
+          go-version: '1.21.x'
+      - name: Install gittuf
+        run: |
+          go install github.com/gittuf/gittuf@latest
+      - name: Install GPG
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gpg
+      - name: Install dependencies
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install -r requirements.txt
+      - name: Run demo with --no-prompt
+        run: |
+          python3 run-demo.py --no-prompt
