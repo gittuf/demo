@@ -5,6 +5,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 
 
@@ -99,9 +100,11 @@ def run_demo():
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
-    prompt_key("Set GNUPGHOME")
+    prompt_key("Set GNUPGHOME and PAGER")
     os.environ["GNUPGHOME"] = tmp_gpg_dir
+    os.environ["PAGER"] = "cat"
     display_command(f"export GNUPGHOME={tmp_gpg_dir}")
+    display_command(f"export PAGER=cat")
 
     prompt_key("Initialize gittuf root of trust")
     cmd = "gittuf trust init -k ../keys/root"
@@ -263,5 +266,8 @@ def run_demo():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--no-prompt":
+            NO_PROMPT = True
     check_binaries()
     run_demo()
