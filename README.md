@@ -4,7 +4,7 @@ A demo of gittuf.
 
 ## Install gittuf
 
-We recommend installing gittuf using Go's toolchain. gittuf requires Go 1.20 or
+We recommend installing gittuf using Go's toolchain. gittuf requires Go 1.21 or
 higher.
 
 ```bash
