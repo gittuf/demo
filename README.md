@@ -4,14 +4,8 @@ A demo of gittuf.
 
 ## Install gittuf
 
-We recommend installing gittuf using Go's toolchain. gittuf requires Go 1.21 or
-higher.
-
-```bash
-go install github.com/gittuf/gittuf@latest
-```
-
-Alternatively, you can clone the repository and build it from source.
+gittuf currently needs to be built from source. After cloning the repository,
+run `make`. Note that gittuf needs Go 1.21 or higher.
 
 ```bash
 git clone https://github.com/gittuf/gittuf
