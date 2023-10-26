@@ -4,12 +4,21 @@ A demo of gittuf.
 
 ## Install gittuf
 
-gittuf currently needs to be built from source. After cloning the repository,
-run `make`. Note that gittuf needs Go 1.21 or higher.
+The [gittuf repository](https://github.com/gittuf/gittuf) provides pre-built
+binaries that are signed and published using
+[GoReleaser](https://goreleaser.com/). The signature for these binaries are
+generated using [Sigstore](https://www.sigstore.dev/), using the release
+workflow's identity. Please use release v0.1.0 or higher, as prior releases were
+created to test the release workflow.  Alternatively, gittuf can also be
+installed using `go install`.
+
+To build from source, clone the repository and run `make`. This will also run
+the test suite prior to installing gittuf. Note that Go 1.21 or higher is
+necessary to build gittuf.
 
 ```bash
 git clone https://github.com/gittuf/gittuf
-
+cd gittuf
 make
 ```
 
