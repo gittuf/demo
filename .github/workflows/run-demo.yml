@@ -19,7 +19,7 @@ jobs:
           go-version: '1.21.x'
       - name: Install gittuf
         run: |
-          go install github.com/gittuf/gittuf@latest
+          go install github.com/gittuf/gittuf@v0.1.0
       - name: Install GPG
         run: |
           sudo apt-get update
