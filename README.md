@@ -105,3 +105,10 @@ gittuf rsl record main
 # This will fail as file protection rule is violated!
 gittuf verify-ref -f main
 ```
+
+## gittuf Verification via GitHub Actions
+
+It is possible to use gittuf in your CI workflows using the
+[gittuf-installer GitHub Action](https://github.com/gittuf/gittuf-installer).
+For an example of gittuf verification in CI, take a look at
+[gittuf/ci-demo](https://github.com/gittuf/ci-demo).
