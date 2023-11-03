@@ -14,7 +14,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
       - name: Install gittuf
-        uses: gittuf/gittuf-installer@401fe20972fe2a60c73154f9c2c052cde7e7effd
+        uses: gittuf/gittuf-installer@74bc31fb990a714302c6cf75f91cccdaf33961bc
         with:
           gittuf-version: '0.1.0'
       - name: Install GPG
