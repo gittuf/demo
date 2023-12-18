@@ -44,26 +44,75 @@ python run-demo.py
 
 ## Manual
 
-If you prefer to run the demo manually, set up a directory structure as follows:
+If you prefer to run the demo manually, follow the steps outlined below.
+You will set up a directory structure as follows:
 
 ```
 .
 ├── keys
+├── gpg-dir
 └── repo
 ```
 
-`keys` must be copied from this repository. You must also create two
+Where `keys` will be copied from this repository. You will create two
 Git-compatible signing keys, one that is authorized for the demo policy and one
-that is not. Finally, set your working directory to `repo`.
+that is not. You will see how policies are created, commit changes and run
+`gittuf` to verify, both on the happy and failing path:
 
 ```bash
+# Temporary playground
+cd $(mktemp -d)
+
+mkdir {keys,repo,gpg-dir}
+chmod 700 gpg-dir
+cp -r ${OLDPWD}/keys .
+
+cd repo
+
+# Either, follow these steps to set GPG home and create a new keyring and keys,
+# or use existing GPG keys. To do so, make note of their key IDs and skip ahead
+# to the git repository creation.
+# gittuf supports other key types, such as sigstore-oidc, but this demo focuses
+# on GPG based keys.
+export GNUPGHOME=../gpg-dir
+
+# For more options see:
+# https://www.gnupg.org/documentation/manuals/gnupg-devel/Unattended-GPG-key-generation.html
+gpg --batch --gen-key <<EOF
+Key-Type: 1
+Key-Length: 1024
+Subkey-Type: 1
+Subkey-Length: 1024
+Name-Real: Authorized Developer
+Name-Email: gittuf.authorized@example.com
+Expire-Date: 0
+%no-protection
+EOF
+
+gpg --batch --gen-key <<EOF
+Key-Type: 1
+Key-Length: 1024
+Subkey-Type: 1
+Subkey-Length: 1024
+Name-Real: Unauthorized Developer
+Name-Email: gittuf.unauthorized@example.com
+Expire-Date: 0
+%no-protection
+EOF
+
+# Make note of the key IDs for "Authorized Developer" and
+# "Unauthorized Developer". The IDs are 40 character long hex strings.
+# These will be referred to as <authorized_key> and <unauthorized_key>
+# in the followings steps, and need to be filled in manually.
+gpg --list-public-keys
+
+# Create demo git repository
 git init -b main
 
 git config --local user.signingkey <authorized_key>  # amend config options as needed for your chosen signing mechanism
 git config --local user.name gittuf-demo
 git config --local user.email gittuf.demo@example.com
 
-export GNUPGHOME=../gpg-dir  # optional: set GPG home if you're using GPG keys from a non-default keyring
 
 gittuf trust init -k ../keys/root
 
@@ -72,7 +121,7 @@ gittuf trust add-policy-key -k ../keys/root --policy-key ../keys/targets.pub
 gittuf policy init -k ../keys/targets
 
 # Add branch protection rule
-gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize-key <signing_mechanism>:<authorized_key>
+gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize-key gpg:<authorized_key>
 
 echo 'Hello, world!' > README.md
 git add README.md
@@ -101,7 +150,7 @@ git update-ref refs/gittuf/reference-state-log refs/gittuf/reference-state-log~1
 git config --local user.signingkey <authorized_key>
 
 # Add file protection rule
-gittuf policy add-rule -k ../keys/targets --rule-name 'protect-readme' --rule-pattern file:README.md --authorize-key <signing_mechanism>:<authorized_key>
+gittuf policy add-rule -k ../keys/targets --rule-name 'protect-readme' --rule-pattern file:README.md --authorize-key gpg:<authorized_key>
 
 # Make change to README.md using unauthorized key
 git config --local user.signingkey <unauthorized_key>
