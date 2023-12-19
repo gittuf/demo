@@ -36,7 +36,7 @@ def display_command(cmd):
 
 
 def setup_gpg_keys(gpg_dir):
-    os.mkdir(gpg_dir)
+    os.mkdir(gpg_dir, mode=0o700)
 
     gpg = gnupg.GPG(gnupghome=gpg_dir)
     gpg.encoding = "utf-8"
