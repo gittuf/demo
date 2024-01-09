@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import gnupg
 import os
 import shlex
 import shutil
@@ -35,54 +34,22 @@ def display_command(cmd):
     print(f"[{os.getcwd()}] $ {cmd}")
 
 
-def setup_gpg_keys(gpg_dir):
-    os.mkdir(gpg_dir, mode=0o700)
-
-    gpg = gnupg.GPG(gnupghome=gpg_dir)
-    gpg.encoding = "utf-8"
-
-    key_params = gpg.gen_key_input(
-        key_type="RSA",
-        key_length=1024,
-        name_real="Authorized Developer",
-        name_email="gittuf.authorized@example.com",
-        no_protection=True
-    )
-    authorized_gpg_key = gpg.gen_key(key_params)
-
-    key_params = gpg.gen_key_input(
-        key_type="RSA",
-        key_length=1024,
-        name_real="Unauthorized Developer",
-        name_email="gittuf.unauthorized@example.com",
-        no_protection=True
-    )
-    unauthorized_gpg_key = gpg.gen_key(key_params)
-
-    return authorized_gpg_key, unauthorized_gpg_key
-
-
 def run_demo():
     current_dir = os.getcwd()
-    gpg_dir = "gpg-dir"
     keys_dir = "keys"
 
     tmp_dir = tempfile.TemporaryDirectory()
-    tmp_gpg_dir = os.path.join(tmp_dir.name, gpg_dir)
     tmp_keys_dir = os.path.join(tmp_dir.name, keys_dir)
     tmp_repo_dir = os.path.join(tmp_dir.name, "repo")
-
-    prompt_key("Create test GPG keys")
-    authorized_gpg_key, unauthorized_gpg_key = setup_gpg_keys(tmp_gpg_dir)
-    prompt_key(
-        "Created authorized key with fingerprint"
-        f" {authorized_gpg_key.fingerprint} and unauthorized key with"
-        f" fingerprint {unauthorized_gpg_key.fingerprint}"
-    )
 
     shutil.copytree(os.path.join(current_dir, keys_dir), tmp_keys_dir)
     os.mkdir(tmp_repo_dir)
     os.chdir(tmp_repo_dir)
+
+    authorized_key_path_git = os.path.join(tmp_keys_dir, "authorized.pub")
+    unauthorized_key_path_git = os.path.join(tmp_keys_dir, "unauthorized.pub")
+
+    authorized_key_path_policy = os.path.join(tmp_keys_dir, "authorized.pub.pem")
 
     prompt_key("Initialize Git repository")
     cmd = "git init -b main"
@@ -90,7 +57,10 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Set repo config to use demo identity and test key")
-    cmd = f"git config --local user.signingkey {authorized_gpg_key.fingerprint}"
+    cmd = f"git config --local gpg.format ssh"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = f"git config --local user.signingkey {authorized_key_path_git}"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
     cmd = f"git config --local user.name gittuf-demo"
@@ -100,10 +70,8 @@ def run_demo():
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
-    prompt_key("Set GNUPGHOME and PAGER")
-    os.environ["GNUPGHOME"] = tmp_gpg_dir
+    prompt_key("Set PAGER")
     os.environ["PAGER"] = "cat"
-    display_command(f"export GNUPGHOME={tmp_gpg_dir}")
     display_command(f"export PAGER=cat")
 
     prompt_key("Initialize gittuf root of trust")
@@ -112,7 +80,8 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Add policy key to gittuf root of trust")
-    cmd = ("gittuf trust add-policy-key"
+    cmd = (
+        "gittuf trust add-policy-key"
         " -k ../keys/root"
         " --policy-key ../keys/targets.pub"
     )
@@ -125,11 +94,12 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Add rule to protect the main branch")
-    cmd = ("gittuf policy add-rule"
+    cmd = (
+        "gittuf policy add-rule"
         " -k ../keys/targets"
         " --rule-name 'protect-main'"
         " --rule-pattern git:refs/heads/main"
-        f" --authorize-key gpg:{authorized_gpg_key.fingerprint}"
+        f" --authorize-key {authorized_key_path_policy}"
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
@@ -154,7 +124,7 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Verify branch protection for this change")
-    cmd = "gittuf verify-ref -f main"
+    cmd = "gittuf verify-ref main"
     display_command(cmd)
     subprocess.run(shlex.split(cmd), check=True)
 
@@ -171,7 +141,7 @@ def run_demo():
     )
 
     prompt_key("Update repo config to use unauthorized key")
-    cmd = f"git config --local user.signingkey {unauthorized_gpg_key.fingerprint}"
+    cmd = f"git config --local user.signingkey {unauthorized_key_path_git}"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
@@ -195,7 +165,7 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Verify branch protection for this change")
-    cmd = "gittuf verify-ref -f main"
+    cmd = "gittuf verify-ref main"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
@@ -215,22 +185,23 @@ def run_demo():
     cmd = "git update-ref refs/gittuf/reference-state-log refs/gittuf/reference-state-log~1"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
-    cmd = f"git config --local user.signingkey {authorized_gpg_key.fingerprint}"
+    cmd = f"git config --local user.signingkey {authorized_key_path_git}"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Add rule to protect README.md")
-    cmd = ("gittuf policy add-rule"
+    cmd = (
+        "gittuf policy add-rule"
         " -k ../keys/targets"
         " --rule-name 'protect-readme'"
         " --rule-pattern file:README.md"
-        f" --authorize-key gpg:{authorized_gpg_key.fingerprint}"
+        f" --authorize-key {authorized_key_path_policy}"
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Make change to README.md using unauthorized key")
-    cmd = f"git config --local user.signingkey {unauthorized_gpg_key.fingerprint}"
+    cmd = f"git config --local user.signingkey {unauthorized_key_path_git}"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
     display_command("echo 'This is not allowed!' >> README.md")
@@ -244,7 +215,7 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("But create RSL entry using authorized key")
-    cmd = f"git config --local user.signingkey {authorized_gpg_key.fingerprint}"
+    cmd = f"git config --local user.signingkey {authorized_key_path_git}"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
     cmd = "gittuf rsl record main"
@@ -255,7 +226,7 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Verify all rules for this change")
-    cmd = "gittuf verify-ref -f main"
+    cmd = "gittuf verify-ref main"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
