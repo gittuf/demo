@@ -116,7 +116,7 @@ git config --local user.email gittuf.demo@example.com
 
 gittuf trust init -k ../keys/root
 
-gittuf trust add-policy-key -k ../keys/root --policy-key ../keys/targets.pub
+gittuf trust add-policy-key -k ../keys/root --policy-key ../keys/targets.pem
 
 gittuf policy init -k ../keys/targets
 
