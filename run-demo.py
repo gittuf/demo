@@ -49,7 +49,7 @@ def run_demo():
     authorized_key_path_git = os.path.join(tmp_keys_dir, "authorized.pub")
     unauthorized_key_path_git = os.path.join(tmp_keys_dir, "unauthorized.pub")
 
-    authorized_key_path_policy = os.path.join(tmp_keys_dir, "authorized.pub.pem")
+    authorized_key_path_policy = os.path.join(tmp_keys_dir, "authorized.pem")
 
     prompt_key("Initialize Git repository")
     cmd = "git init -b main"
@@ -83,7 +83,7 @@ def run_demo():
     cmd = (
         "gittuf trust add-policy-key"
         " -k ../keys/root"
-        " --policy-key ../keys/targets.pub"
+        " --policy-key ../keys/targets.pem"
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
