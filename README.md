@@ -50,7 +50,6 @@ You will set up a directory structure as follows:
 ```
 .
 ├── keys
-├── gpg-dir
 └── repo
 ```
 
@@ -63,7 +62,7 @@ that is not. You will see how policies are created, commit changes and run
 # Temporary playground
 cd $(mktemp -d)
 
-mkdir {keys,repo,gpg-dir}
+mkdir {keys,repo,gpg-dir}  # gpg-dir is optional
 chmod 700 gpg-dir
 cp -r ${OLDPWD}/keys .
 
@@ -72,8 +71,9 @@ cd repo
 # Either, follow these steps to set GPG home and create a new keyring and keys,
 # or use existing GPG keys. To do so, make note of their key IDs and skip ahead
 # to the git repository creation.
-# gittuf supports other key types, such as sigstore-oidc, but this demo focuses
-# on GPG based keys.
+# gittuf supports other key types, such as sigstore-oidc and SSH, but this demo
+# focuses on GPG based keys. Note that the scripted demo uses SSH keys that are
+# checked into the keys directory.
 export GNUPGHOME=../gpg-dir
 
 # For more options see:
@@ -116,7 +116,7 @@ git config --local user.email gittuf.demo@example.com
 
 gittuf trust init -k ../keys/root
 
-gittuf trust add-policy-key -k ../keys/root --policy-key ../keys/targets.pub
+gittuf trust add-policy-key -k ../keys/root --policy-key ../keys/targets.pem
 
 gittuf policy init -k ../keys/targets
 
