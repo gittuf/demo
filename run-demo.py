@@ -46,6 +46,9 @@ def run_demo():
     os.mkdir(tmp_repo_dir)
     os.chdir(tmp_repo_dir)
 
+    for key in os.listdir(tmp_keys_dir):
+        os.chmod(os.path.join(tmp_keys_dir, key), 0o600)
+
     authorized_key_path_git = os.path.join(tmp_keys_dir, "authorized.pub")
     unauthorized_key_path_git = os.path.join(tmp_keys_dir, "unauthorized.pub")
 
