@@ -131,7 +131,7 @@ git commit -m 'Initial commit'
 gittuf rsl record main
 
 # This will succeed!
-gittuf verify-ref -f main
+gittuf verify-ref main
 
 # Simulate violation by using unauthorized key
 git config --local user.signingkey <unauthorized_key>
@@ -143,7 +143,7 @@ git commit -m 'Update README.md'
 gittuf rsl record main
 
 # This will fail as branch protection rule is violated!
-gittuf verify-ref -f main
+gittuf verify-ref main
 
 # Rewind to known good state
 git reset --hard HEAD~1
@@ -165,7 +165,7 @@ git config --local user.signingkey <authorized_key>
 gittuf rsl record main
 
 # This will fail as file protection rule is violated!
-gittuf verify-ref -f main
+gittuf verify-ref main
 ```
 
 ## gittuf Verification via GitHub Actions
