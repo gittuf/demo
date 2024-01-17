@@ -22,18 +22,6 @@ cd gittuf
 make
 ```
 
-## Install Dependencies
-
-Download the required Python dependencies:
-
-```bash
-# (optional) create a new virtual environment
-python -m pip venv .venv
-source .venv/bin/activate
-# install dependencies
-python -m pip install -r requirements.txt
-```
-
 ## Run Demo
 
 You can run the scripted demo with commentary using the run-demo script.
