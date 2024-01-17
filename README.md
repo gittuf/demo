@@ -47,9 +47,10 @@ python run-demo.py
 If you prefer to run the demo manually, follow the steps outlined below.
 You will set up a directory structure as follows:
 
-```
+```bash
 .
 ├── keys
+├── gpg-dir  # gpg-dir is optional
 └── repo
 ```
 
