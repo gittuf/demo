@@ -63,6 +63,9 @@ def run_demo():
     cmd = f"git config --local gpg.format ssh"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
+    cmd = f"git config --local commit.gpgsign true"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
     cmd = f"git config --local user.signingkey {authorized_key_path_git}"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
