@@ -109,6 +109,9 @@ def run_demo():
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
+    cmd = "gittuf policy apply"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
 
     prompt_key("Make change to repo's main branch")
     display_command("echo 'Hello, world!' > README.md")
@@ -203,6 +206,9 @@ def run_demo():
         " --rule-pattern file:README.md"
         f" --authorize-key {authorized_key_path_policy}"
     )
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = "gittuf policy apply"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
