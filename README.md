@@ -112,6 +112,9 @@ gittuf policy init -k ../keys/targets
 # Add branch protection rule
 gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize-key gpg:<authorized_key>
 
+# Apply policy
+gittuf policy apply
+
 echo 'Hello, world!' > README.md
 git add README.md
 git commit -m 'Initial commit'
@@ -140,6 +143,9 @@ git config --local user.signingkey <authorized_key>
 
 # Add file protection rule
 gittuf policy add-rule -k ../keys/targets --rule-name 'protect-readme' --rule-pattern file:README.md --authorize-key gpg:<authorized_key>
+
+# Apply policy
+gittuf policy apply
 
 # Make change to README.md using unauthorized key
 git config --local user.signingkey <unauthorized_key>
