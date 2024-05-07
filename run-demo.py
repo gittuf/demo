@@ -109,6 +109,9 @@ def run_demo():
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
+    cmd = "gittuf policy apply"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
 
     prompt_key("Make change to repo's main branch")
     display_command("echo 'Hello, world!' > README.md")
@@ -135,16 +138,6 @@ def run_demo():
     subprocess.run(shlex.split(cmd), check=True)
 
     prompt_key("gittuf's verification succeeded!")
-
-    prompt_key("Verify commit signature using gittuf policy")
-    cmd = "gittuf verify-commit HEAD"
-    display_command(cmd)
-    subprocess.run(shlex.split(cmd), check=True)
-
-    prompt_key(
-        "gittuf's policy recognizes the signing key and"
-        " confirms it's a good signature!"
-    )
 
     prompt_key("Update repo config to use unauthorized key")
     cmd = f"git config --local user.signingkey {unauthorized_key_path_git}"
@@ -177,13 +170,6 @@ def run_demo():
 
     prompt_key("gittuf detected a violation of the branch protection rule!")
 
-    prompt_key("Verify commit signature using gittuf policy")
-    cmd = "gittuf verify-commit HEAD"
-    display_command(cmd)
-    subprocess.run(shlex.split(cmd), check=True)
-
-    prompt_key("gittuf's policy does not recognize the signing key!")
-
     prompt_key("Rewind to last good state to test file protection rules")
     cmd = "git reset --hard HEAD~1"
     display_command(cmd)
@@ -203,6 +189,9 @@ def run_demo():
         " --rule-pattern file:README.md"
         f" --authorize-key {authorized_key_path_policy}"
     )
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = "gittuf policy apply"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
