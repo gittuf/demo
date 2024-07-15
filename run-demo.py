@@ -9,7 +9,7 @@ import tempfile
 
 
 NO_PROMPT = False
-REQUIRED_BINARIES = ["git", "gittuf", "gpg"]
+REQUIRED_BINARIES = ["git", "gittuf", "ssh-keygen"]
 
 
 def check_binaries():
@@ -52,7 +52,7 @@ def run_demo():
     authorized_key_path_git = os.path.join(tmp_keys_dir, "authorized.pub")
     unauthorized_key_path_git = os.path.join(tmp_keys_dir, "unauthorized.pub")
 
-    authorized_key_path_policy = os.path.join(tmp_keys_dir, "authorized.pem")
+    authorized_key_path_policy = os.path.join(tmp_keys_dir, "authorized.pub")
 
     prompt_key("Initialize Git repository")
     cmd = "git init -b main"
@@ -89,7 +89,7 @@ def run_demo():
     cmd = (
         "gittuf trust add-policy-key"
         " -k ../keys/root"
-        " --policy-key ../keys/targets.pem"
+        " --policy-key ../keys/targets.pub"
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
