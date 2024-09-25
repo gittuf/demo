@@ -14,11 +14,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - name: Install gittuf
         uses: gittuf/gittuf-installer@fe644793aaaa419fef63800d5cf318663aa93105
         with:
-          gittuf-version: 0.5.1
+          gittuf-version: 0.6.0
       - name: Run demo with --no-prompt
         run: |
           python3 run-demo.py --no-prompt
