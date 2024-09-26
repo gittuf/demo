@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install gittuf
-        uses: gittuf/gittuf-installer@fe644793aaaa419fef63800d5cf318663aa93105
+        uses: gittuf/gittuf-installer@26235450ee63a0bb9d834ecd62b910783af72006
         with:
           gittuf-version: 0.6.0
       - name: Run demo with --no-prompt
