@@ -99,6 +99,15 @@ def run_demo():
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
+    prompt_key("Add key definition to policy")
+    cmd = (
+        "gittuf policy add-key"
+        " -k ../keys/targets"
+        " --public-key ../keys/authorized.pub"
+    )
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+
     prompt_key("Add rule to protect the main branch")
     cmd = (
         "gittuf policy add-rule"
