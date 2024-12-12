@@ -13,7 +13,7 @@ created to test the release workflow.  Alternatively, gittuf can also be
 installed using `go install`.
 
 To build from source, clone the repository and run `make`. This will also run
-the test suite prior to installing gittuf. Note that Go 1.22 or higher is
+the test suite prior to installing gittuf. Note that Go 1.23 or higher is
 necessary to build gittuf.
 
 ```bash
@@ -76,6 +76,9 @@ gittuf trust init -k ../keys/root
 gittuf trust add-policy-key -k ../keys/root --policy-key ../keys/targets.pub
 
 gittuf policy init -k ../keys/targets
+
+# Add key definition to policy
+gittuf policy add-key -k ../keys/targets --public-key ../keys/authorized.pub
 
 # Add branch protection rule
 gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize-key ../keys/authorized.pub
