@@ -17,16 +17,14 @@ def check_binaries(required_binaries):
         if not shutil.which(p):
             raise Exception(f"required command {p} not found")
 
-def prompt_key(auto, opnum, optotal, prompt):
+def prompt_key(auto, prompt):
     """Controls the flow of the demo for each step"""
     if auto:
-        print(f"\n({opnum} / {optotal}): {prompt}")
-        return opnum + 1
+        print(f"\n{prompt}")
     inp = False
     while inp != "":
         try:
-            inp = input(f"\n({opnum} / {optotal}): {prompt} -- press Enter to continue")
-            return opnum + 1
+            inp = input(f"{prompt} -- press Enter to continue")
         except Exception:
             pass
 
