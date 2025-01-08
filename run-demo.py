@@ -4,7 +4,6 @@ import os
 import shutil
 import tempfile
 import click
-import subprocess
 
 from utils import prompt_key, display_command, run_command, check_binaries, print_section
 
@@ -160,7 +159,8 @@ def run_demo(automatic, repository_directory):
     prompt_key(automatic, "Make unauthorized change to repo's main branch")
     cmd = "echo 'This is not allowed!' >> README.md"
     display_command(cmd)
-    subprocess.call(cmd, shell=True) 
+    with open("README.md", "a") as fp:
+        fp.write("This is not allowed!\n")
 
     cmd = "git add README.md"
     display_command(cmd)
@@ -216,10 +216,12 @@ def run_demo(automatic, repository_directory):
     prompt_key(automatic, "Make change to README.md using unauthorized key")
     cmd = f"git config --local user.signingkey {unauthorized_key_path_git}"
     display_command(cmd)
-    run_command(cmd, 1)
+    run_command(cmd, 0)
 
+    cmd = "echo 'This is not allowed!' >> README.md"
     display_command("echo 'This is not allowed!' >> README.md")
-    subprocess.call(cmd, shell=True)
+    with open("README.md", "a") as fp:
+        fp.write("This is not allowed!\n")
 
     cmd = "git add README.md"
     display_command(cmd)

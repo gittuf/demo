@@ -21,10 +21,11 @@ def prompt_key(auto, prompt):
     """Controls the flow of the demo for each step"""
     if auto:
         print(f"\n{prompt}")
+        return
     inp = False
     while inp != "":
         try:
-            inp = input(f"{prompt} -- press Enter to continue")
+            inp = input(f"\n{prompt} -- press Enter to continue")
         except Exception:
             pass
 
