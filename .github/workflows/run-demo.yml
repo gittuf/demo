@@ -25,3 +25,6 @@ jobs:
       - name: Run demo with --automatic
         run: |
           python3 run-demo.py --automatic
+      - name: Run run deployments example with --automatic
+        run: |
+          python3 example_deployments.py --automatic

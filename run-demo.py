@@ -5,7 +5,7 @@ import shutil
 import tempfile
 import click
 
-from utils import prompt_key, display_command, run_command, check_binaries, print_section
+from utils import prompt_key, display_command, run_command, check_binaries 
 
 REQUIRED_BINARIES = ["git", "gittuf", "ssh-keygen"]
 
