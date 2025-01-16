@@ -258,3 +258,4 @@ def run_demo(automatic, repository_directory):
 if __name__ == "__main__":
     check_binaries(REQUIRED_BINARIES)
     run_demo() # pylint: disable=no-value-for-parameter
+

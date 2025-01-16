@@ -425,3 +425,4 @@ def deployment(automatic, repository_directory):
 if __name__ == "__main__":
     check_binaries(REQUIRED_BINARIES)
     deployment()  # pylint: disable=no-value-for-parameter
+

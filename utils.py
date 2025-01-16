@@ -32,3 +32,4 @@ def run_command(cmd, expected_retcode):
     retcode = subprocess.call(shlex.split(cmd)) 
     if retcode != expected_retcode:
         raise Exception(f"Expected {expected_retcode} from process but it exited with {retcode}.")
+
