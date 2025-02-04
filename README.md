@@ -1,6 +1,19 @@
 # gittuf/demo
 
-A demo of gittuf.
+A set of demos for gittuf. This repository contains two distinct demos:
+
+`run-demo.py`
+This demo showcases the basic features of gittuf. This includes creating
+policies, recording changes in the rsl, and running gittuf verification. 
+You will see both the happy path, where verification is successful, and 
+the failing path, where verification is not successful. 
+
+`example_deployments.py`
+This demo showcases some of the more involved features of gittuf.
+This includes creating delagated policies as well as using multiple 
+keys with a set threshold for number of required signatures. From 
+the result of this script, you will see an example state of the 
+policy file in a deployment.  
 
 ## Install gittuf
 
@@ -43,8 +56,7 @@ You will set up a directory structure as follows:
 
 Where `keys` will be copied from this repository. You will create two
 Git-compatible signing keys, one that is authorized for the demo policy and one
-that is not. You will see how policies are created, commit changes and run
-`gittuf` to verify, both on the happy and failing path:
+that is not. 
 
 ```bash
 # Temporary playground
