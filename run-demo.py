@@ -35,6 +35,7 @@ def display_command(cmd):
 
 
 def run_demo():
+    os.environ["GITTUF_ALLOW_V02_POLICY"] = "1"
     current_dir = os.getcwd()
     keys_dir = "keys"
 
@@ -118,7 +119,12 @@ def run_demo():
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
-    cmd = "gittuf policy apply"
+
+    prompt_key("Stage and apply policy")
+    cmd = "gittuf policy stage --local-only"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = "gittuf policy apply --local-only"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
@@ -134,7 +140,7 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Record change to main in RSL")
-    cmd = "gittuf rsl record main"
+    cmd = "gittuf rsl record --local-only main"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
     cmd = "git show refs/gittuf/reference-state-log"
@@ -165,7 +171,7 @@ def run_demo():
     subprocess.call(shlex.split(cmd))
 
     prompt_key("Record change to main in RSL")
-    cmd = "gittuf rsl record main"
+    cmd = "gittuf rsl record --local-only main"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
     cmd = "git show refs/gittuf/reference-state-log"
@@ -200,7 +206,12 @@ def run_demo():
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
-    cmd = "gittuf policy apply"
+
+    prompt_key("Stage and apply policy")
+    cmd = "gittuf policy stage --local-only"
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+    cmd = "gittuf policy apply --local-only"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
@@ -222,7 +233,7 @@ def run_demo():
     cmd = f"git config --local user.signingkey {authorized_key_path_git}"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
-    cmd = "gittuf rsl record main"
+    cmd = "gittuf rsl record --local-only main"
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
     cmd = "git show refs/gittuf/reference-state-log"
