@@ -83,14 +83,15 @@ gittuf policy add-key -k ../keys/targets --public-key ../keys/authorized.pub
 # Add branch protection rule
 gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize-key ../keys/authorized.pub
 
-# Apply policy
-gittuf policy apply
+# Stage and apply policy
+gittuf policy stage --local-only
+gittuf policy apply --local-only
 
 echo 'Hello, world!' > README.md
 git add README.md
 git commit -m 'Initial commit'
 
-gittuf rsl record main
+gittuf rsl record main --local-only
 
 # This will succeed!
 gittuf verify-ref main
@@ -102,7 +103,7 @@ echo 'This is not allowed!' >> README.md
 git add README.md
 git commit -m 'Update README.md'
 
-gittuf rsl record main
+gittuf rsl record main --local-only
 
 # This will fail as branch protection rule is violated!
 gittuf verify-ref main
@@ -115,8 +116,9 @@ git config --local user.signingkey ../keys/authorized
 # Add file protection rule
 gittuf policy add-rule -k ../keys/targets --rule-name 'protect-readme' --rule-pattern file:README.md --authorize-key ../keys/authorized.pub
 
-# Apply policy
-gittuf policy apply
+# Stage and apply policy
+gittuf policy stage --local-only
+gittuf policy apply --local-only
 
 # Make change to README.md using unauthorized key
 git config --local user.signingkey ../keys/unauthorized
@@ -127,7 +129,7 @@ git commit -m 'Update README.md'
 
 # But record RSL entry using authorized key to meet branch protection rule
 git config --local user.signingkey ../keys/authorized
-gittuf rsl record main
+gittuf rsl record main --local-only
 
 # This will fail as file protection rule is violated!
 gittuf verify-ref main
