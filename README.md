@@ -13,7 +13,7 @@ created to test the release workflow.  Alternatively, gittuf can also be
 installed using `go install`.
 
 To build from source, clone the repository and run `make`. This will also run
-the test suite prior to installing gittuf. Note that Go 1.23 or higher is
+the test suite prior to installing gittuf. Note that Go 1.24 or higher is
 necessary to build gittuf.
 
 ```bash
