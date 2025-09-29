@@ -33,6 +33,10 @@ def prompt_key(prompt):
 def display_command(cmd):
     print(f"[{os.getcwd()}] $ {cmd}")
 
+def run_command(cmd, expected_retcode=0):
+    retcode = subprocess.call(shlex.split(cmd))
+    if retcode != expected_retcode:
+        raise Exception(f"Expected {expected_retcode} from process but it exited with {retcode}.")
 
 def run_demo():
     current_dir = os.getcwd()
@@ -57,24 +61,24 @@ def run_demo():
     prompt_key("Initialize Git repository")
     cmd = "git init -b main"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Set repo config to use demo identity and test key")
     cmd = f"git config --local gpg.format ssh"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = f"git config --local commit.gpgsign true"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = f"git config --local user.signingkey {authorized_key_path_git}"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = f"git config --local user.name gittuf-demo"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = f"git config --local user.email gittuf.demo@example.com"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Set PAGER")
     os.environ["PAGER"] = "cat"
@@ -83,7 +87,7 @@ def run_demo():
     prompt_key("Initialize gittuf root of trust")
     cmd = "gittuf trust init -k ../keys/root"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Add policy key to gittuf root of trust")
     cmd = (
@@ -92,12 +96,12 @@ def run_demo():
         " --policy-key ../keys/targets.pub"
     )
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Initialize policy")
     cmd = "gittuf policy init -k ../keys/targets"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Add trusted person to gittuf policy file")
     cmd = (
@@ -107,7 +111,7 @@ def run_demo():
         f" --public-key {authorized_key_path_policy}"
     )
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Add rule to protect the main branch")
     cmd = (
@@ -118,15 +122,15 @@ def run_demo():
         " --authorize authorized-user"
     )
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     cmd = "gittuf policy stage --local-only"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     cmd = "gittuf policy apply --local-only"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Make change to repo's main branch")
     display_command("echo 'Hello, world!' > README.md")
@@ -134,30 +138,30 @@ def run_demo():
         fp.write("Hello, world!\n")
     cmd = "git add README.md"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = "git commit -m 'Initial commit'"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Record change to main in RSL")
     cmd = "gittuf rsl record main --local-only"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = "git show refs/gittuf/reference-state-log"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Verify branch protection for this change")
     cmd = "gittuf verify-ref main"
     display_command(cmd)
-    subprocess.run(shlex.split(cmd), check=True)
+    run_command(cmd)
 
     prompt_key("gittuf's verification succeeded!")
 
     prompt_key("Update repo config to use unauthorized key")
     cmd = f"git config --local user.signingkey {unauthorized_key_path_git}"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Make unauthorized change to repo's main branch")
     display_command("echo 'This is not allowed!' >> README.md")
@@ -165,36 +169,36 @@ def run_demo():
         fp.write("This is not allowed!\n")
     cmd = "git add README.md"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = "git commit -m 'Update README.md'"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Record change to main in RSL")
     cmd = "gittuf rsl record main --local-only"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = "git show refs/gittuf/reference-state-log"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Verify branch protection for this change")
     cmd = "gittuf verify-ref main"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd, expected_retcode=1)
 
     prompt_key("gittuf detected a violation of the branch protection rule!")
 
     prompt_key("Rewind to last good state to test file protection rules")
     cmd = "git reset --hard HEAD~1"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = "git update-ref refs/gittuf/reference-state-log refs/gittuf/reference-state-log~1"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = f"git config --local user.signingkey {authorized_key_path_git}"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Add rule to protect README.md")
     cmd = (
@@ -205,45 +209,45 @@ def run_demo():
         " --authorize authorized-user"
     )
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     cmd = "gittuf policy stage --local-only"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     cmd = "gittuf policy apply --local-only"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Make change to README.md using unauthorized key")
     cmd = f"git config --local user.signingkey {unauthorized_key_path_git}"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     display_command("echo 'This is not allowed!' >> README.md")
     with open("README.md", "a") as fp:
         fp.write("This is not allowed!\n")
     cmd = "git add README.md"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = "git commit -m 'Update README.md'"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("But create RSL entry using authorized key")
     cmd = f"git config --local user.signingkey {authorized_key_path_git}"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = "gittuf rsl record main --local-only"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
     cmd = "git show refs/gittuf/reference-state-log"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd)
 
     prompt_key("Verify all rules for this change")
     cmd = "gittuf verify-ref main"
     display_command(cmd)
-    subprocess.call(shlex.split(cmd))
+    run_command(cmd, expected_retcode=1)
 
     prompt_key(
         "gittuf detected a **file** protection rule violation even though the"
