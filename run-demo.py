@@ -49,7 +49,7 @@ def run_demo():
     for key in os.listdir(tmp_keys_dir):
         os.chmod(os.path.join(tmp_keys_dir, key), 0o600)
 
-    authorized_key_path_git = os.path.join(tmp_keys_dir, "authorized.pub")
+    authorized_key_path_git = os.path.join(tmp_keys_dir, "authorized")
     unauthorized_key_path_git = os.path.join(tmp_keys_dir, "unauthorized.pub")
 
     authorized_key_path_policy = os.path.join(tmp_keys_dir, "authorized.pub")
@@ -99,6 +99,16 @@ def run_demo():
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
 
+    prompt_key("Add trusted person to gittuf policy file")
+    cmd = (
+        "gittuf policy add-person"
+        " --person-ID 'authorized-user'"
+        f" --public-key {authorized_key_path_policy}"
+        " -k ../keys/targets"
+    )
+    display_command(cmd)
+    subprocess.call(shlex.split(cmd))
+
     prompt_key("Add key definition to policy")
     cmd = (
         "gittuf policy add-key"
@@ -114,7 +124,7 @@ def run_demo():
         " -k ../keys/targets"
         " --rule-name 'protect-main'"
         " --rule-pattern git:refs/heads/main"
-        f" --authorize-key {authorized_key_path_policy}"
+        " --authorize authorized-user"
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
@@ -201,7 +211,7 @@ def run_demo():
         " -k ../keys/targets"
         " --rule-name 'protect-readme'"
         " --rule-pattern file:README.md"
-        f" --authorize-key {authorized_key_path_policy}"
+        " --authorize authorized-user"
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
