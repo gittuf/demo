@@ -77,11 +77,8 @@ gittuf trust add-policy-key -k ../keys/root --policy-key ../keys/targets.pub
 
 gittuf policy init -k ../keys/targets
 
-# Add key definition to policy
-gittuf policy add-key -k ../keys/targets --public-key ../keys/authorized.pub
-
 # Add trusted person to gittuf policy file
-gittuf policy add-person --person-ID 'authorized-user' --public-key ../keys/authorized.pub
+gittuf policy add-person -k ../keys/targets --person-ID 'authorized-user' --public-key ../keys/authorized.pub
 
 # Add branch protection rule
 gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize authorized-user
