@@ -102,18 +102,9 @@ def run_demo():
     prompt_key("Add trusted person to gittuf policy file")
     cmd = (
         "gittuf policy add-person"
+        " -k ../keys/targets"
         " --person-ID 'authorized-user'"
         f" --public-key {authorized_key_path_policy}"
-        " -k ../keys/targets"
-    )
-    display_command(cmd)
-    subprocess.call(shlex.split(cmd))
-
-    prompt_key("Add key definition to policy")
-    cmd = (
-        "gittuf policy add-key"
-        " -k ../keys/targets"
-        " --public-key ../keys/authorized.pub"
     )
     display_command(cmd)
     subprocess.call(shlex.split(cmd))
