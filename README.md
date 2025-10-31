@@ -30,6 +30,25 @@ You can run the scripted demo with commentary using the run-demo script.
 python run-demo.py
 ```
 
+## Multi-Repository Demo
+
+The multi-repository demo shows how gittuf can manage trust and policies across multiple repositories in an organization. This is useful when you have several related repositories that need to share security policies or when you want centralized policy management.
+
+In this demo, you'll see two repositories working together:
+
+- A **controller repository** that acts as the central authority, defining global policies and managing trust rules that apply across multiple repositories
+- A **network repository** that links to the controller and inherits its trust policies
+
+The demo walks through setting up both repositories, establishing the trust relationship between them, and then propagating and verifying changes across the network. This showcases how gittuf can scale beyond single-repository security to handle real-world organizational needs where multiple teams work across different repositories but need consistent security policies.
+
+To run the multi-repository demo:
+
+```bash
+python run-multi-repo-demo.py
+```
+
+The script will automatically set up both repositories in a temporary directory and guide you through the process with prompts explaining each step.
+
 ## Manual
 
 If you prefer to run the demo manually, follow the steps outlined below.
