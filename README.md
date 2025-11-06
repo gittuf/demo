@@ -83,8 +83,8 @@ gittuf policy add-person -k ../keys/targets --person-ID 'authorized-user' --publ
 # Add branch protection rule
 gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main' --rule-pattern git:refs/heads/main --authorize authorized-user
 
-# Add delegation rule 
-gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main-delegated' --policy name 'protect-main' --rule-pattern git:refs/heads/main --authorize authorized-user
+# Add a delegated branch protection rule 
+gittuf policy add-rule -k ../keys/targets --rule-name 'protect-main-delegated' --policy-name 'protect-main' --rule-pattern git:refs/heads/main --authorize authorized-user
 
 # Stage and apply policy
 gittuf policy stage --local-only
