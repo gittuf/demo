@@ -53,10 +53,10 @@ def run_demo():
     for key in os.listdir(tmp_keys_dir):
         os.chmod(os.path.join(tmp_keys_dir, key), 0o600)
 
-    authorized_key_path_git = os.path.join(tmp_keys_dir, "authorized")
-    unauthorized_key_path_git = os.path.join(tmp_keys_dir, "unauthorized.pub")
-
-    authorized_key_path_policy = os.path.join(tmp_keys_dir, "authorized.pub")
+    root_key_path_git = os.path.join(tmp_keys_dir, "root")
+    alice_key_path_git = os.path.join(tmp_keys_dir, "alice")
+    alice_key_path_policy = os.path.join(tmp_keys_dir, "alice.pub")
+    bob_key_path_git = os.path.join(tmp_keys_dir, "bob.pub")
 
     prompt_key("Initialize Git repository")
     cmd = "git init -b main"
@@ -70,7 +70,7 @@ def run_demo():
     cmd = f"git config --local commit.gpgsign true"
     display_command(cmd)
     run_command(cmd)
-    cmd = f"git config --local user.signingkey {authorized_key_path_git}"
+    cmd = f"git config --local user.signingkey {root_key_path_git}"
     display_command(cmd)
     run_command(cmd)
     cmd = f"git config --local user.name gittuf-demo"
@@ -103,12 +103,12 @@ def run_demo():
     display_command(cmd)
     run_command(cmd)
 
-    prompt_key("Add trusted person to gittuf policy file")
+    prompt_key("Add trusted person (Alice) to gittuf policy file")
     cmd = (
         "gittuf policy add-person"
         " -k ../keys/targets"
-        " --person-ID 'authorized-user'"
-        f" --public-key {authorized_key_path_policy}"
+        " --person-ID 'Alice'"
+        f" --public-key {alice_key_path_policy}"
     )
     display_command(cmd)
     run_command(cmd)
@@ -119,19 +119,7 @@ def run_demo():
         " -k ../keys/targets"
         " --rule-name 'protect-main'"
         " --rule-pattern git:refs/heads/main"
-        " --authorize authorized-user"
-    )
-    display_command(cmd)
-    run_command(cmd)
-
-    prompt_key("Add policy file to delegate responsibility")
-    cmd = ( 
-        "gittuf policy add-rule"
-        "-k ../keys/targets"
-        "--rule-name 'protect-main-delegated'"
-        "--policy-name protect-main"
-        "--rule-pattern git:refs/heads/main"
-        "--authorize authorized-user"
+        " --authorize Alice"
     )
     display_command(cmd)
     run_command(cmd)
@@ -144,7 +132,19 @@ def run_demo():
     display_command(cmd)
     run_command(cmd)
 
-    prompt_key("Make change to repo's main branch")
+    prompt_key("Alice sets her signing key and identity on Git")
+    cmd = f"git config --local user.signingkey {alice_key_path_git}"
+    display_command(cmd)
+    run_command(cmd)
+    cmd = f"git config --local user.name Alice"
+    display_command(cmd)
+    run_command(cmd)
+    cmd = f"git config --local user.email alice@example.com
+    display_command(cmd)
+    run_command(cmd)
+    display_command("echo 'Hello, world!' > README.md")
+    
+    prompt_key("Alice makes a change to repo's main branch")
     display_command("echo 'Hello, world!' > README.md")
     with open("README.md", "w") as fp:
         fp.write("Hello, world!\n")
@@ -161,7 +161,8 @@ def run_demo():
     run_command(cmd)
     cmd = "git show refs/gittuf/reference-state-log"
     display_command(cmd)
-    run_command(cmd)
+    run_command
+    (cmd)
 
     prompt_key("Verify branch protection for this change")
     cmd = "gittuf verify-ref main"
@@ -170,58 +171,38 @@ def run_demo():
 
     prompt_key("gittuf's verification succeeded!")
 
-    prompt_key("Update repo config to use unauthorized key")
-    cmd = f"git config --local user.signingkey {unauthorized_key_path_git}"
-    display_command(cmd)
-    run_command(cmd)
-
-    prompt_key("Make unauthorized change to repo's main branch")
-    display_command("echo 'This is not allowed!' >> README.md")
-    with open("README.md", "a") as fp:
-        fp.write("This is not allowed!\n")
-    cmd = "git add README.md"
-    display_command(cmd)
-    run_command(cmd)
-    cmd = "git commit -m 'Update README.md'"
-    display_command(cmd)
-    run_command(cmd)
-
-    prompt_key("Record change to main in RSL")
-    cmd = "gittuf rsl record main --local-only"
-    display_command(cmd)
-    run_command(cmd)
-    cmd = "git show refs/gittuf/reference-state-log"
-    display_command(cmd)
-    run_command(cmd)
-
-    prompt_key("Verify branch protection for this change")
-    cmd = "gittuf verify-ref main"
-    display_command(cmd)
-    run_command(cmd, expected_retcode=1)
-
-    prompt_key("gittuf detected a violation of the branch protection rule!")
-
-    prompt_key("Rewind to last good state to test file protection rules")
-    cmd = "git reset --hard HEAD~1"
-    display_command(cmd)
-    run_command(cmd)
-    cmd = "git update-ref refs/gittuf/reference-state-log refs/gittuf/reference-state-log~1"
-    display_command(cmd)
-    run_command(cmd)
-    cmd = f"git config --local user.signingkey {authorized_key_path_git}"
-    display_command(cmd)
-    run_command(cmd)
-
-    prompt_key("Add rule to protect README.md")
+    prompt_key("Now Alice adds a policy file to delegate responsibility")
     cmd = (
-        "gittuf policy add-rule"
-        " -k ../keys/targets"
-        " --rule-name 'protect-readme'"
-        " --rule-pattern file:README.md"
-        " --authorize authorized-user"
+        "gittuf policy init"
+        f" -k {alice_key_path_git}"
+        " --policy-name protect-main"
     )
     display_command(cmd)
     run_command(cmd)
+
+    prompt_key("Alice adds Bob as an authorized user in the delegated policy")
+    cmd = (
+        "gittuf policy add-rule"
+        f" -k {alice_key_path_git}"
+        " --person-ID 'Bob"
+        " --policy-name 'protect-main'"
+        f" --public-key {bob_key_path_git}"
+    )
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Alice adds a rule to delegate her authorization to main")
+    cmd = (
+        "gittuf policy add-rule"
+        f" -k {alice_key_path_git}"
+        " --rule-name 'protect-main-delegated'"
+        " --policy-name 'protect-main'"
+        " --rule-pattern git:refs/heads/main"
+        f" --authorize Bob"
+    )
+    display_command(cmd)
+    run_command(cmd)
+
 
     cmd = "gittuf policy stage --local-only"
     display_command(cmd)
@@ -231,24 +212,28 @@ def run_demo():
     display_command(cmd)
     run_command(cmd)
 
-    prompt_key("Make change to README.md using unauthorized key")
-    cmd = f"git config --local user.signingkey {unauthorized_key_path_git}"
+    prompt_key("Now, Bob makes a change to the main branch!")
+    cmd = f"git config --local user.signingkey {bob_key_path_git}"
     display_command(cmd)
     run_command(cmd)
-    display_command("echo 'This is not allowed!' >> README.md")
-    with open("README.md", "a") as fp:
-        fp.write("This is not allowed!\n")
-    cmd = "git add README.md"
+    cmd = f"git config --local user.name Bob"
     display_command(cmd)
     run_command(cmd)
-    cmd = "git commit -m 'Update README.md'"
+    cmd = f"git config --local user.email bob@example.com
     display_command(cmd)
     run_command(cmd)
 
-    prompt_key("But create RSL entry using authorized key")
-    cmd = f"git config --local user.signingkey {authorized_key_path_git}"
+    display_command("echo 'This is Bob's change!' >> README.md")
+    with open("README.md", "a") as fp:
+        fp.write("Hello, Bob!\n")
+    cmd = "git add README.md"
     display_command(cmd)
     run_command(cmd)
+    cmd = "git commit -m 'Initial commit from Bob'"
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Record Bob's change to main in RSL")
     cmd = "gittuf rsl record main --local-only"
     display_command(cmd)
     run_command(cmd)
@@ -256,17 +241,25 @@ def run_demo():
     display_command(cmd)
     run_command(cmd)
 
-    prompt_key("Verify all rules for this change")
+    prompt_key("Verify branch protection for Bob's change")
     cmd = "gittuf verify-ref main"
     display_command(cmd)
-    run_command(cmd, expected_retcode=1)
+    run_command(cmd)
 
-    prompt_key(
-        "gittuf detected a **file** protection rule violation even though the"
-        " branch protection rule was met!"
+    prompt_key("gittuf's verification succeeded for Bob's change!")
+
+    prompt_key("Add policy file to delegate responsibility")
+    cmd = ( 
+        "gittuf policy add-rule"
+        "-k ../keys/targets"
+        "--rule-name 'protect-main-delegated'"
+        "--policy-name protect-main"
+        "--rule-pattern git:refs/heads/main"
+        "--authorize authorized-user"
     )
-
-
+    display_command(cmd)
+    run_command(cmd)
+    
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "--no-prompt":
