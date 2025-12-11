@@ -85,11 +85,6 @@ def run_demo() -> None:
     display_command(cmd)
     run_command(cmd)
 
-    prompt_key("Add policy key to controller's root of trust")
-    cmd = f"gittuf trust add-policy-key -k {root_key_path} --policy-key {targets_pub_path}"
-    display_command(cmd)
-    run_command(cmd)
-
     prompt_key("Make repository a controller")
     cmd = f"gittuf trust make-controller -k {root_key_path}"
     display_command(cmd)
@@ -107,14 +102,6 @@ def run_demo() -> None:
     display_command(cmd)
     run_command(cmd)
 
-    prompt_key("Stage and apply controller trust changes")
-    for cmd in [
-        f"gittuf trust stage --local-only -k {root_key_path}",
-        f"gittuf trust apply --local-only -k {root_key_path}",
-    ]:
-        display_command(cmd)
-        run_command(cmd)
-
     prompt_key("Register network repository with controller")
     network_abs = os.path.abspath(network_dir)
     cmd = (
@@ -127,14 +114,14 @@ def run_demo() -> None:
     display_command(cmd)
     run_command(cmd)
 
-    prompt_key("Stage and apply controller changes after network registration")
+    prompt_key("Stage and apply controller trust changes")
     for cmd in [
         f"gittuf trust stage --local-only -k {root_key_path}",
         f"gittuf trust apply --local-only -k {root_key_path}",
     ]:
         display_command(cmd)
         run_command(cmd)
-
+    
     # ====== Network repository setup ======
     prompt_key("Initialise network Git repository")
     os.chdir(network_dir)
@@ -183,13 +170,40 @@ def run_demo() -> None:
         run_command(cmd)
 
     # ====== Propagate and verify ======
-    prompt_key("Propagate RSL entries into network and verify network state")
-    for cmd in [
-        "gittuf rsl propagate",
-        "gittuf verify-network",
-    ]:
-        display_command(cmd)
-        run_command(cmd)
+    prompt_key("Propagate RSL entries from upstream repository")
+    cmd = "gittuf rsl propagate"
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Make change to repo's main branch")
+    display_command("echo 'Hello, world!' > README.md")
+    with open("README.md", "w") as fp:
+        fp.write("Hello, world!\n")
+    cmd = "git add README.md"
+    display_command(cmd)
+    run_command(cmd)
+    cmd = "git commit -m 'Initial commit'"
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Record change to main in RSL")
+    cmd = "gittuf rsl record main --local-only"
+    display_command(cmd)
+    run_command(cmd)
+    cmd = "git show refs/gittuf/reference-state-log"
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Verify branch protection for this change")
+    cmd = "gittuf verify-ref main"
+    display_command(cmd)
+    run_command(cmd, 1)
+
+    prompt_key("Verify the network of policies from the controller repository")
+    os.chdir(controller_dir)
+    cmd = "gittuf verify-network"
+    display_command(cmd)
+    run_command(cmd)
 
     prompt_key("Multi-repository demo complete!")
 
