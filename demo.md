@@ -117,3 +117,48 @@ gittuf rsl record main --local-only
 # This will fail as file protection rule is violated!
 gittuf verify-ref main
 ```
+
+## Multi-party approval
+
+We can also enforce multi-party approval requirements on specific branches. For example, to require two approvals before changes can be merged into `main`:
+
+```bash
+# Add a second authorized person to the policy
+gittuf policy add-person \
+  -k ../keys/targets \
+  --person-ID authorized-user-2 \
+  --public-key ../keys/authorized2.pub
+
+# Update the protect-main rule to require 2 approvals
+gittuf policy update-rule \
+  -k ../keys/targets \
+  --rule-name protect-main \
+  --rule-pattern git:refs/heads/main \
+  --authorize authorized-user \
+  --authorize authorized-user-2 \
+  --threshold 2
+
+# Stage and apply policy
+gittuf policy stage --local-only
+gittuf policy apply --local-only
+
+# If a developer attempts to verify mergeability with only one signature
+git checkout -b feature
+echo 'Multi-party test' >> README.md
+git add README.md
+git commit -m 'Add multi-party feature'
+gittuf rsl record feature --local-only
+
+# This will fail because the required threshold of 2 is not satisfied
+gittuf verify-mergeable --base-branch main --feature-branch feature
+
+# Add approval attestation from the second authorized party
+gittuf attest authorize \
+  -k ../keys/authorized2 \
+  --from-ref feature \
+  --create-rsl-entry \
+  main
+
+# Verification now succeeds
+gittuf verify-mergeable --base-branch main --feature-branch feature
+```
