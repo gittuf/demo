@@ -254,6 +254,94 @@ def run_demo():
         " branch protection rule was met!"
     )
 
+    prompt_key("Rewind to last good state to demonstrate multi-party approval")
+    cmd = "git reset --hard HEAD~1"
+    display_command(cmd)
+    run_command(cmd)
+    cmd = "git update-ref refs/gittuf/reference-state-log refs/gittuf/reference-state-log~1"
+    display_command(cmd)
+    run_command(cmd)
+
+    authorized2_key_path_git = os.path.join(tmp_keys_dir, "authorized2")
+    authorized2_key_path_policy = os.path.join(tmp_keys_dir, "authorized2.pub")
+
+    prompt_key("Add second trusted person to gittuf policy")
+    cmd = (
+        "gittuf policy add-person"
+        " -k ../keys/targets"
+        " --person-ID authorized-user-2"
+        f" --public-key {authorized2_key_path_policy}"
+    )
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Update rule to require 2 signatures for main branch")
+    cmd = (
+        "gittuf policy update-rule"
+        " -k ../keys/targets"
+        " --rule-name protect-main"
+        " --rule-pattern git:refs/heads/main"
+        " --authorize authorized-user"
+        " --authorize authorized-user-2"
+        " --threshold 2"
+    )
+    display_command(cmd)
+    run_command(cmd)
+
+    cmd = "gittuf policy stage --local-only"
+    display_command(cmd)
+    run_command(cmd)
+
+    cmd = "gittuf policy apply --local-only"
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Create feature branch and commit with authorized-user")
+    cmd = "git checkout -b feature"
+    display_command(cmd)
+    run_command(cmd)
+    cmd = f"git config --local user.signingkey {authorized_key_path_git}"
+    display_command(cmd)
+    run_command(cmd)
+    with open("README.md", "a") as fp:
+        fp.write("Multi-party test\n")
+    cmd = "git add README.md"
+    display_command(cmd)
+    run_command(cmd)
+    cmd = "git commit -m 'Add multi-party feature'"
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Record feature branch in RSL")
+    cmd = "gittuf rsl record feature --local-only"
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Verify mergeability: expect failure because threshold 2 is not met")
+    cmd = "gittuf verify-mergeable --base-branch main --feature-branch feature"
+    display_command(cmd)
+    run_command(cmd, expected_retcode=1)
+
+    prompt_key("gittuf successfully detected that there is a missing second approval!")
+
+    prompt_key("Add approval attestation from authorized-user-2")
+    cmd = (
+        "gittuf attest authorize"
+        f" -k {authorized2_key_path_git}"
+        " --from-ref feature"
+        " --create-rsl-entry"
+        " main"
+    )
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("Verify mergeability again: expect success with 2 approvals")
+    cmd = "gittuf verify-mergeable --base-branch main --feature-branch feature"
+    display_command(cmd)
+    run_command(cmd)
+
+    prompt_key("gittuf successfully verified mergeability with multi-party approval!")
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
