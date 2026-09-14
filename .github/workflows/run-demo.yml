@@ -2,12 +2,29 @@ name: Run gittuf demo
 on:
   push:
     branches: ['main']
+    paths:
+      - 'run-*.py'
+      - 'keys/**'
+      - '.github/workflows/run-demo.yml'
   pull_request:
+    paths:
+      - 'run-*.py'
+      - 'keys/**'
+      - '.github/workflows/run-demo.yml'
   workflow_dispatch:
+
 jobs:
   run-demo:
-    name: Run demo
+    name: Run ${{ matrix.demo.name }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        demo:
+          - name: gittuf demo
+            script: run-demo.py
+          - name: multi-repo demo
+            script: run-multi-repo-demo.py
     steps:
       - name: Checkout demo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -20,5 +37,7 @@ jobs:
         with:
           gittuf-version: 'main'
       - name: Run demo with --no-prompt
+        env:
+          NO_PROMPT: "1"
         run: |
-          python3 run-demo.py --no-prompt
+          python3 ${{ matrix.demo.script }} --no-prompt
