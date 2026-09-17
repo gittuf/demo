@@ -25,6 +25,8 @@ jobs:
             script: run-demo.py
           - name: multi-repo demo
             script: run-multi-repo-demo.py
+          - name: recovery demo
+            script: run-recovery-demo.py
     steps:
       - name: Checkout demo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
