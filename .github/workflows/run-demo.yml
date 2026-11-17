@@ -33,7 +33,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
         with:
-          python-version: '3.13'
+          python-version: '3.15'
       - name: Install gittuf
         uses: gittuf/gittuf-installer@4ecbb57b40e6eb6beaba120dcbef46123b0249e0
         with:
