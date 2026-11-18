@@ -38,6 +38,8 @@ def run_command(cmd, expected_retcode=0):
 def run_demo() -> None:
     check_binaries()
 
+    os.environ["GITTUF_DEV"] = "1"
+
     current_dir = os.getcwd()
     keys_dir = os.path.join(current_dir, "keys")
 

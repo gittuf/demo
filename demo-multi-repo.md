@@ -35,6 +35,9 @@ and guide you through the process with prompts explaining each step.
 If you prefer to run the demo manually, follow the steps outlined below.
 
 ```bash
+# Multi-repo features are in devmode
+export GITTUF_DEV=1
+
 # Temporary playground
 cd $(mktemp -d)
 
