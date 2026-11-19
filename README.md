@@ -29,6 +29,7 @@ This repository contains various demos of gittuf functionality:
 1. Basic Functionality ([demo.md](/demo.md))
 2. Multi-Repository Functionality ([demo-multi-repo.md](/demo-multi-repo.md))
 3. Recovery Workflow ([demo-recovery.md](/demo-recovery.md))
+4. Signature Verification ([signatures-demo.md](/signatures-demo.md))
 
 ## gittuf Verification via GitHub Actions
 
