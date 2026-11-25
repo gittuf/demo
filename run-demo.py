@@ -34,7 +34,14 @@ def display_command(cmd):
     print(f"[{os.getcwd()}] $ {cmd}")
 
 def run_command(cmd, expected_retcode=0):
-    retcode = subprocess.call(shlex.split(cmd))
+    if os.name == "nt":
+        lexer = shlex.shlex(cmd, posix=True)
+        lexer.whitespace_split = True
+        lexer.escape = ""
+        args = list(lexer)
+    else:
+        args = shlex.split(cmd)
+    retcode = subprocess.call(args)
     if retcode != expected_retcode:
         raise Exception(f"Expected {expected_retcode} from process but it exited with {retcode}.")
 
@@ -51,12 +58,39 @@ def run_demo():
     os.chdir(tmp_repo_dir)
 
     for key in os.listdir(tmp_keys_dir):
-        os.chmod(os.path.join(tmp_keys_dir, key), 0o600)
+        key_path = os.path.join(tmp_keys_dir, key)
+        os.chmod(key_path, 0o600)
 
-    authorized_key_path_git = os.path.join(tmp_keys_dir, "authorized")
-    unauthorized_key_path_git = os.path.join(tmp_keys_dir, "unauthorized.pub")
+        if os.name == "nt":
+            subprocess.run(
+                ["icacls", key_path, "/inheritance:r"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run(
+                ["icacls", key_path, "/grant:r", os.environ["USERNAME"] + ":F"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run(
+                ["icacls", key_path, "/remove", "OWNER RIGHTS"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
 
-    authorized_key_path_policy = os.path.join(tmp_keys_dir, "authorized.pub")
+    authorized_key_path_git = os.path.join(
+        tmp_keys_dir, "authorized"
+    ).replace("\\", "/")
+    unauthorized_key_path_git = os.path.join(
+        tmp_keys_dir, "unauthorized.pub"
+    ).replace("\\", "/")
+
+    authorized_key_path_policy = os.path.join(
+        tmp_keys_dir, "authorized.pub"
+    ).replace("\\", "/")
 
     prompt_key("Initialize Git repository")
     cmd = "git init -b main"
@@ -262,8 +296,13 @@ def run_demo():
     display_command(cmd)
     run_command(cmd)
 
-    authorized2_key_path_git = os.path.join(tmp_keys_dir, "authorized2")
-    authorized2_key_path_policy = os.path.join(tmp_keys_dir, "authorized2.pub")
+    authorized2_key_path_git = os.path.join(
+        tmp_keys_dir, "authorized2"
+    ).replace("\\", "/")
+
+    authorized2_key_path_policy = os.path.join(
+        tmp_keys_dir, "authorized2.pub"
+    ).replace("\\", "/")
 
     prompt_key("Add second trusted person to gittuf policy")
     cmd = (
@@ -341,6 +380,7 @@ def run_demo():
     run_command(cmd)
 
     prompt_key("gittuf successfully verified mergeability with multi-party approval!")
+    os.chdir(current_dir)
 
 
 if __name__ == "__main__":
