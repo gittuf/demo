@@ -4,11 +4,13 @@ on:
     branches: ['main']
     paths:
       - 'run-*.py'
+      - 'demo_utils.py'
       - 'keys/**'
       - '.github/workflows/run-demo.yml'
   pull_request:
     paths:
       - 'run-*.py'
+      - 'demo_utils.py'
       - 'keys/**'
       - '.github/workflows/run-demo.yml'
   workflow_dispatch:
@@ -41,7 +43,5 @@ jobs:
         with:
           gittuf-version: 'main'
       - name: Run demo with --no-prompt
-        env:
-          NO_PROMPT: "1"
         run: |
           python3 ${{ matrix.demo.script }} --no-prompt

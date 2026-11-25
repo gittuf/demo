@@ -1,2 +1,3 @@
 gpg-dir
 .venv
+__pycache__/
