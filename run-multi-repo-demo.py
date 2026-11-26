@@ -1,43 +1,14 @@
 #!/usr/bin/env python
 
 import os
-import shlex
 import shutil
-import subprocess
-import sys
 import tempfile
+
+from demo_utils import check_binaries, display_command, prompt_key, run_command
 
 REQUIRED_BINARIES = ["git", "gittuf", "ssh-keygen"]
 
-def check_binaries():
-    for binary in REQUIRED_BINARIES:
-        if not shutil.which(binary):
-            raise RuntimeError(f"required command {binary} not found")
-
-def prompt_key(prompt):
-    no_prompt = os.environ.get("NO_PROMPT") == "1"
-    if no_prompt:
-        print(f"\n{prompt}")
-        return
-    try:
-        input(f"\n{prompt} -- press enter to continue")
-    except Exception:
-        # Input can occasionally raise when run in certain environments
-        pass
-
-def display_command(cmd):
-    print(f"[{os.getcwd()}] $ {cmd}")
-
-def run_command(cmd, expected_retcode=0):
-    retcode = subprocess.call(shlex.split(cmd))
-    if retcode != expected_retcode:
-        raise RuntimeError(
-            f"Expected return code {expected_retcode} but command exited with {retcode}"
-        )
-
 def run_demo() -> None:
-    check_binaries()
-
     os.environ["GITTUF_DEV"] = "1"
 
     current_dir = os.getcwd()
@@ -184,8 +155,5 @@ def run_demo() -> None:
 
 
 if __name__ == "__main__":
-    try:
-        run_demo()
-    except Exception as exc:
-        print(f"ERROR: {exc}")
-        sys.exit(1)
+    check_binaries(REQUIRED_BINARIES)
+    run_demo()
